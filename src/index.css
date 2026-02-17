@@ -6,52 +6,52 @@
 
 @layer base {
   :root {
-    --background: 222 47% 6%;
+    --background: 220 40% 7%;
     --foreground: 210 40% 96%;
 
-    --card: 222 47% 9%;
+    --card: 220 40% 10%;
     --card-foreground: 210 40% 96%;
 
-    --popover: 222 47% 9%;
+    --popover: 220 40% 10%;
     --popover-foreground: 210 40% 96%;
 
-    --primary: 210 100% 56%;
-    --primary-foreground: 222 47% 6%;
+    --primary: 348 72% 47%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 222 30% 14%;
+    --secondary: 220 35% 15%;
     --secondary-foreground: 210 40% 96%;
 
-    --muted: 222 30% 14%;
+    --muted: 220 35% 15%;
     --muted-foreground: 215 20% 55%;
 
-    --accent: 0 72% 50%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 348 72% 47%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 222 30% 18%;
-    --input: 222 30% 18%;
-    --ring: 210 100% 56%;
+    --border: 220 35% 18%;
+    --input: 220 35% 18%;
+    --ring: 348 72% 47%;
 
     --radius: 0.5rem;
 
     /* Custom tokens */
     --ice-blue: 200 100% 70%;
-    --deep-red: 0 72% 50%;
-    --navy: 222 47% 6%;
-    --navy-light: 222 30% 14%;
+    --deep-red: 348 72% 47%;
+    --navy: 220 40% 7%;
+    --navy-light: 220 35% 15%;
     --gold: 45 100% 60%;
     --live-green: 142 76% 45%;
 
-    --gradient-hero: linear-gradient(135deg, hsl(222 47% 6%) 0%, hsl(222 47% 12%) 50%, hsl(210 60% 10%) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(222 30% 12%) 0%, hsl(222 47% 8%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(210 100% 56%) 0%, hsl(200 100% 70%) 100%);
-    --gradient-red: linear-gradient(135deg, hsl(0 72% 50%) 0%, hsl(0 84% 60%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(220 40% 7%) 0%, hsl(220 40% 12%) 50%, hsl(220 45% 10%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(220 35% 12%) 0%, hsl(220 40% 8%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(348 72% 47%) 0%, hsl(348 80% 55%) 100%);
+    --gradient-red: linear-gradient(135deg, hsl(348 72% 47%) 0%, hsl(0 84% 60%) 100%);
     --gradient-live: linear-gradient(90deg, hsl(142 76% 45%) 0%, hsl(142 76% 55%) 100%);
 
-    --shadow-glow-blue: 0 0 30px hsl(210 100% 56% / 0.15);
-    --shadow-glow-red: 0 0 30px hsl(0 72% 50% / 0.15);
+    --shadow-glow-blue: 0 0 30px hsl(348 72% 47% / 0.15);
+    --shadow-glow-red: 0 0 30px hsl(348 72% 47% / 0.2);
     --shadow-card: 0 4px 20px hsl(0 0% 0% / 0.3);
 
     --sidebar-background: 222 47% 8%;
