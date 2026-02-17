@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
-import { Shield, Trophy, Calendar, Users, BarChart3, ExternalLink } from "lucide-react";
+import { Trophy, Calendar, Users, BarChart3, ExternalLink } from "lucide-react";
 import heroBg from "@/assets/hero-bg.jpg";
+import iphfLogo from "@/assets/iphf-logo.png";
 import { teams, players, matches, news } from "@/lib/mock-data";
 
 const Index = () => {
@@ -20,7 +21,7 @@ const Index = () => {
         </div>
         <div className="relative container mx-auto px-4 py-24 md:py-36 text-center">
           <div className="flex justify-center mb-6">
-            <Shield className="h-16 w-16 md:h-20 md:w-20 text-primary" />
+            <img src={iphfLogo} alt="IPHF Logo" className="h-24 w-24 md:h-32 md:w-32 rounded-full shadow-glow-red" />
           </div>
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-heading font-bold tracking-tight text-foreground mb-3">
             INTERNATIONAL PUCK<br />

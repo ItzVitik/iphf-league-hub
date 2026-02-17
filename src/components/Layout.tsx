@@ -1,8 +1,9 @@
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Shield } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import LiveBar from "./LiveBar";
 import { liveMode, matches } from "@/lib/mock-data";
+import iphfLogo from "@/assets/iphf-logo.png";
 
 const navItems = [
   { label: "Home", path: "/" },
@@ -36,7 +37,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       <header className="sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur-md">
         <div className="container mx-auto flex items-center justify-between px-4 py-3">
           <Link to="/" className="flex items-center gap-2.5">
-            <Shield className="h-8 w-8 text-primary" />
+            <img src={iphfLogo} alt="IPHF Logo" className="h-10 w-10 rounded-full" />
             <div className="flex flex-col leading-none">
               <span className="text-lg font-heading font-bold tracking-wide text-foreground">IPHF</span>
               <span className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground">Puck Hockey Federation</span>
@@ -98,7 +99,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         <div className="container mx-auto px-4 py-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <Shield className="h-5 w-5 text-primary" />
+              <img src={iphfLogo} alt="IPHF" className="h-6 w-6 rounded-full" />
               <span className="font-heading font-bold text-foreground">IPHF</span>
               <span className="text-xs text-muted-foreground">© 2025 International Puck Hockey Federation</span>
             </div>
