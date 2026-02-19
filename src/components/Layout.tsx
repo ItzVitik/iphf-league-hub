@@ -61,18 +61,16 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 {item.label}
               </Link>
             ))}
-            {isAdmin && (
-              <Link
-                to="/admin"
-                className={`px-3 py-2 rounded text-sm font-medium transition-colors flex items-center gap-1 ${
-                  location.pathname === "/admin"
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:text-foreground hover:bg-secondary"
-                }`}
-              >
-                <Shield className="h-3.5 w-3.5" /> Admin
-              </Link>
-            )}
+            <Link
+              to={isAdmin ? "/admin" : "/login"}
+              className={`px-3 py-2 rounded text-sm font-medium transition-colors flex items-center gap-1 ${
+                location.pathname === "/admin" || location.pathname === "/login"
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+              }`}
+            >
+              <Shield className="h-3.5 w-3.5" /> Admin
+            </Link>
           </nav>
 
           {/* Mobile toggle */}
