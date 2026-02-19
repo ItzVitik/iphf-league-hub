@@ -164,16 +164,32 @@ const PlayerPanel = () => {
   const { data: teams } = useTeams();
   const qc = useQueryClient();
   const { toast } = useToast();
-  const [form, setForm] = useState({ name: "", team_id: "", position: "F", jersey: "", status: "Active", gp: "0", goals: "0", assists: "0", points: "0", plus_minus: "0", pim: "0" });
+  const [form, setForm] = useState({
+    name: "", team_id: "", position: "F", jersey: "", status: "Active",
+    gp: "0", goals: "0", assists: "0", plus_minus: "0", pim: "0",
+    saves: "", shots_against: "", gaa: "", shutouts: "",
+  });
   const [editId, setEditId] = useState<string | null>(null);
+
+  // Auto-calculated values
+  const autoPoints = parseInt(form.goals || "0") + parseInt(form.assists || "0");
+  const savesNum = parseInt(form.saves || "0");
+  const shotsNum = parseInt(form.shots_against || "0");
+  const autoSavePct = shotsNum > 0 ? (savesNum / shotsNum) : null;
 
   const save = async () => {
     if (!form.name) return;
-    const payload = { 
-      name: form.name, team_id: form.team_id || null, position: form.position, 
+    const isGoalie = form.position === "G";
+    const payload: any = {
+      name: form.name, team_id: form.team_id || null, position: form.position,
       jersey: form.jersey ? parseInt(form.jersey) : null, status: form.status,
       gp: parseInt(form.gp), goals: parseInt(form.goals), assists: parseInt(form.assists),
-      points: parseInt(form.points), plus_minus: parseInt(form.plus_minus), pim: parseInt(form.pim)
+      points: autoPoints, plus_minus: parseInt(form.plus_minus), pim: parseInt(form.pim),
+      saves: isGoalie && form.saves ? savesNum : null,
+      shots_against: isGoalie && form.shots_against ? shotsNum : null,
+      save_pct: isGoalie ? autoSavePct : null,
+      gaa: isGoalie && form.gaa ? parseFloat(form.gaa) : null,
+      shutouts: isGoalie && form.shutouts ? parseInt(form.shutouts) : null,
     };
     let error;
     if (editId) {
@@ -183,7 +199,7 @@ const PlayerPanel = () => {
     }
     if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
     toast({ title: editId ? "Player updated" : "Player created" });
-    setForm({ name: "", team_id: "", position: "F", jersey: "", status: "Active", gp: "0", goals: "0", assists: "0", points: "0", plus_minus: "0", pim: "0" });
+    setForm({ name: "", team_id: "", position: "F", jersey: "", status: "Active", gp: "0", goals: "0", assists: "0", plus_minus: "0", pim: "0", saves: "", shots_against: "", gaa: "", shutouts: "" });
     setEditId(null);
     qc.invalidateQueries({ queryKey: ["admin-players"] });
   };
@@ -192,6 +208,18 @@ const PlayerPanel = () => {
     await supabase.from("players").delete().eq("id", id);
     toast({ title: "Player deleted" });
     qc.invalidateQueries({ queryKey: ["admin-players"] });
+  };
+
+  const startEdit = (p: any) => {
+    setEditId(p.id);
+    setForm({
+      name: p.name, team_id: p.team_id || "", position: p.position,
+      jersey: p.jersey?.toString() || "", status: p.status,
+      gp: p.gp.toString(), goals: p.goals.toString(), assists: p.assists.toString(),
+      plus_minus: p.plus_minus.toString(), pim: p.pim.toString(),
+      saves: p.saves?.toString() || "", shots_against: (p as any).shots_against?.toString() || "",
+      gaa: p.gaa?.toString() || "", shutouts: p.shutouts?.toString() || "",
+    });
   };
 
   return (
@@ -225,10 +253,28 @@ const PlayerPanel = () => {
             <Input placeholder="GP" value={form.gp} onChange={e => setForm({ ...form, gp: e.target.value })} />
             <Input placeholder="Goals" value={form.goals} onChange={e => setForm({ ...form, goals: e.target.value })} />
             <Input placeholder="Assists" value={form.assists} onChange={e => setForm({ ...form, assists: e.target.value })} />
-            <Input placeholder="Points" value={form.points} onChange={e => setForm({ ...form, points: e.target.value })} />
+            <div className="flex items-center gap-2 bg-secondary/50 rounded px-3 py-2">
+              <span className="text-xs text-muted-foreground">Points:</span>
+              <span className="font-bold text-primary">{autoPoints}</span>
+            </div>
             <Input placeholder="+/-" value={form.plus_minus} onChange={e => setForm({ ...form, plus_minus: e.target.value })} />
             <Input placeholder="PIM" value={form.pim} onChange={e => setForm({ ...form, pim: e.target.value })} />
           </div>
+          {form.position === "G" && (
+            <div className="border-t border-border pt-3 mt-3">
+              <p className="text-xs text-muted-foreground font-semibold uppercase mb-2">Goalie Stats</p>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <Input placeholder="Saves" value={form.saves} onChange={e => setForm({ ...form, saves: e.target.value })} />
+                <Input placeholder="Shots Against" value={form.shots_against} onChange={e => setForm({ ...form, shots_against: e.target.value })} />
+                <div className="flex items-center gap-2 bg-secondary/50 rounded px-3 py-2">
+                  <span className="text-xs text-muted-foreground">SV%:</span>
+                  <span className="font-bold text-accent">{autoSavePct !== null ? (autoSavePct * 100).toFixed(1) + "%" : "—"}</span>
+                </div>
+                <Input placeholder="GAA" value={form.gaa} onChange={e => setForm({ ...form, gaa: e.target.value })} />
+                <Input placeholder="Shutouts" value={form.shutouts} onChange={e => setForm({ ...form, shutouts: e.target.value })} />
+              </div>
+            </div>
+          )}
           <div className="flex gap-2">
             <Button onClick={save}>{editId ? "Update" : "Create"}</Button>
             {editId && <Button variant="ghost" onClick={() => setEditId(null)}>Cancel</Button>}
@@ -237,10 +283,10 @@ const PlayerPanel = () => {
       </Card>
       <Table>
         <TableHeader><TableRow>
-          <TableHead>Name</TableHead><TableHead>Team</TableHead><TableHead>Pos</TableHead><TableHead>GP</TableHead><TableHead>G</TableHead><TableHead>A</TableHead><TableHead>P</TableHead><TableHead className="w-24">Actions</TableHead>
+          <TableHead>Name</TableHead><TableHead>Team</TableHead><TableHead>Pos</TableHead><TableHead>GP</TableHead><TableHead>G</TableHead><TableHead>A</TableHead><TableHead>P</TableHead><TableHead>SV%</TableHead><TableHead className="w-24">Actions</TableHead>
         </TableRow></TableHeader>
         <TableBody>
-          {isLoading ? <TableRow><TableCell colSpan={8}>Loading...</TableCell></TableRow> :
+          {isLoading ? <TableRow><TableCell colSpan={9}>Loading...</TableCell></TableRow> :
             players?.map((p: any) => (
               <TableRow key={p.id}>
                 <TableCell className="font-medium">{p.name}</TableCell>
@@ -249,13 +295,11 @@ const PlayerPanel = () => {
                 <TableCell>{p.gp}</TableCell>
                 <TableCell>{p.goals}</TableCell>
                 <TableCell>{p.assists}</TableCell>
-                <TableCell>{p.points}</TableCell>
+                <TableCell className="font-bold text-primary">{p.points}</TableCell>
+                <TableCell>{p.position === "G" && p.save_pct != null ? (Number(p.save_pct) * 100).toFixed(1) + "%" : "—"}</TableCell>
                 <TableCell>
                   <div className="flex gap-1">
-                    <Button size="icon" variant="ghost" onClick={() => {
-                      setEditId(p.id);
-                      setForm({ name: p.name, team_id: p.team_id || "", position: p.position, jersey: p.jersey?.toString() || "", status: p.status, gp: p.gp.toString(), goals: p.goals.toString(), assists: p.assists.toString(), points: p.points.toString(), plus_minus: p.plus_minus.toString(), pim: p.pim.toString() });
-                    }}><Pencil className="h-4 w-4" /></Button>
+                    <Button size="icon" variant="ghost" onClick={() => startEdit(p)}><Pencil className="h-4 w-4" /></Button>
                     <Button size="icon" variant="ghost" onClick={() => remove(p.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
                   </div>
                 </TableCell>

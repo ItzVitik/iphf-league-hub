@@ -1,15 +1,64 @@
 import { Link } from "react-router-dom";
 import { Trophy, Calendar, Users, BarChart3, ExternalLink } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import heroBg from "@/assets/hero-bg.jpg";
 import iphfLogo from "@/assets/iphf-logo.png";
-import { teams, players, matches, news } from "@/lib/mock-data";
 
 const Index = () => {
-  const upcomingMatches = matches.filter((m) => m.status === "Scheduled").slice(0, 3);
-  const topScorers = [...players].filter((p) => p.position !== "G").sort((a, b) => b.points - a.points).slice(0, 3);
-  const bestGoalie = [...players].filter((p) => p.position === "G").sort((a, b) => (b.savePct ?? 0) - (a.savePct ?? 0))[0];
-  const standingsPreview = [...teams].sort((a, b) => b.pts - a.pts).slice(0, 5);
-  const latestNews = news.slice(0, 3);
+  // Fetch standings with team info
+  const { data: standings } = useQuery({
+    queryKey: ["home-standings"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("standings").select("*, teams(id, name, abbreviation, color)").order("pts", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Fetch players with team info
+  const { data: players } = useQuery({
+    queryKey: ["home-players"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("players").select("*, teams(name)").order("points", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Fetch upcoming matches
+  const { data: upcomingMatches } = useQuery({
+    queryKey: ["home-upcoming"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("matches").select("*, team_a:teams!team_a_id(name), team_b:teams!team_b_id(name)").eq("status", "Scheduled").order("match_date").limit(3);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Fetch latest news
+  const { data: latestNews } = useQuery({
+    queryKey: ["home-news"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("news_articles").select("*").order("published_at", { ascending: false }).limit(3);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const skaters = players?.filter(p => p.position !== "G") || [];
+  const goalies = players?.filter(p => p.position === "G") || [];
+  const topScorer = skaters[0];
+  const bestGoalie = [...goalies].sort((a, b) => (Number(b.save_pct) || 0) - (Number(a.save_pct) || 0))[0];
+
+  // Player of the Month: highest points this calendar month
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+  // Simple approach: player with most points overall (in a real system you'd track monthly stats)
+  // Using top scorer as Player of the Month
+  const playerOfMonth = skaters[0];
+
+  const standingsPreview = standings?.slice(0, 5) || [];
 
   return (
     <div>
@@ -64,31 +113,31 @@ const Index = () => {
       <section className="container mx-auto px-4 py-12">
         <h2 className="text-2xl font-heading font-bold text-foreground mb-6">Player Spotlight</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {topScorers[0] && (
+          {topScorer && (
             <div className="bg-gradient-card rounded-lg border border-primary/20 p-5 shadow-glow-blue">
               <div className="text-xs uppercase tracking-wider text-primary font-semibold mb-1">Top Scorer</div>
-              <div className="text-xl font-heading font-bold text-foreground">{topScorers[0].name}</div>
-              <div className="text-sm text-muted-foreground">{topScorers[0].teamName}</div>
-              <div className="mt-3 text-3xl font-heading font-bold text-primary">{topScorers[0].points} <span className="text-sm text-muted-foreground font-body">PTS</span></div>
-              <div className="text-xs text-muted-foreground">{topScorers[0].goals}G · {topScorers[0].assists}A</div>
+              <div className="text-xl font-heading font-bold text-foreground">{topScorer.name}</div>
+              <div className="text-sm text-muted-foreground">{(topScorer as any).teams?.name || "Free Agent"}</div>
+              <div className="mt-3 text-3xl font-heading font-bold text-primary">{topScorer.points} <span className="text-sm text-muted-foreground font-body">PTS</span></div>
+              <div className="text-xs text-muted-foreground">{topScorer.goals}G · {topScorer.assists}A</div>
             </div>
           )}
           {bestGoalie && (
             <div className="bg-gradient-card rounded-lg border border-accent/20 p-5 shadow-glow-red">
               <div className="text-xs uppercase tracking-wider text-accent font-semibold mb-1">Best Goalie</div>
               <div className="text-xl font-heading font-bold text-foreground">{bestGoalie.name}</div>
-              <div className="text-sm text-muted-foreground">{bestGoalie.teamName}</div>
-              <div className="mt-3 text-3xl font-heading font-bold text-accent">{((bestGoalie.savePct ?? 0) * 100).toFixed(1)}%<span className="text-sm text-muted-foreground font-body ml-1">SV%</span></div>
-              <div className="text-xs text-muted-foreground">{bestGoalie.shutouts} SO · {bestGoalie.saves} SVS</div>
+              <div className="text-sm text-muted-foreground">{(bestGoalie as any).teams?.name || "Free Agent"}</div>
+              <div className="mt-3 text-3xl font-heading font-bold text-accent">{bestGoalie.save_pct != null ? (Number(bestGoalie.save_pct) * 100).toFixed(1) : "0.0"}%<span className="text-sm text-muted-foreground font-body ml-1">SV%</span></div>
+              <div className="text-xs text-muted-foreground">{bestGoalie.shutouts ?? 0} SO · {bestGoalie.saves ?? 0} SVS</div>
             </div>
           )}
-          {topScorers[0] && (
+          {playerOfMonth && (
             <div className="bg-gradient-card rounded-lg border border-gold/20 p-5">
-              <div className="text-xs uppercase tracking-wider text-gold font-semibold mb-1">Player of the Week</div>
-              <div className="text-xl font-heading font-bold text-foreground">{topScorers[0].name}</div>
-              <div className="text-sm text-muted-foreground">{topScorers[0].teamName}</div>
+              <div className="text-xs uppercase tracking-wider text-gold font-semibold mb-1">Player of the Month</div>
+              <div className="text-xl font-heading font-bold text-foreground">{playerOfMonth.name}</div>
+              <div className="text-sm text-muted-foreground">{(playerOfMonth as any).teams?.name || "Free Agent"}</div>
               <div className="mt-3 text-3xl font-heading font-bold text-gold">⭐</div>
-              <div className="text-xs text-muted-foreground">Hat trick vs Red Storm</div>
+              <div className="text-xs text-muted-foreground">{playerOfMonth.points} PTS · {playerOfMonth.goals}G · {playerOfMonth.assists}A</div>
             </div>
           )}
         </div>
@@ -117,21 +166,24 @@ const Index = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {standingsPreview.map((team, i) => (
-                    <tr key={team.id} className="border-b border-border/50 hover:bg-secondary/50 transition-colors">
+                  {standingsPreview.map((s: any, i) => (
+                    <tr key={s.id} className="border-b border-border/50 hover:bg-secondary/50 transition-colors">
                       <td className="px-4 py-3 font-bold text-muted-foreground">{i + 1}</td>
                       <td className="px-4 py-3">
-                        <Link to={`/teams/${team.id}`} className="font-semibold text-foreground hover:text-primary transition-colors">
-                          {team.name}
+                        <Link to={`/teams/${s.teams?.id}`} className="font-semibold text-foreground hover:text-primary transition-colors">
+                          {s.teams?.name}
                         </Link>
                       </td>
-                      <td className="text-center px-2 py-3 text-muted-foreground">{team.gp}</td>
-                      <td className="text-center px-2 py-3">{team.w}</td>
-                      <td className="text-center px-2 py-3">{team.l}</td>
-                      <td className="text-center px-2 py-3">{team.ot}</td>
-                      <td className="text-center px-2 py-3 font-bold text-primary">{team.pts}</td>
+                      <td className="text-center px-2 py-3 text-muted-foreground">{s.gp}</td>
+                      <td className="text-center px-2 py-3">{s.w}</td>
+                      <td className="text-center px-2 py-3">{s.l}</td>
+                      <td className="text-center px-2 py-3">{s.ot}</td>
+                      <td className="text-center px-2 py-3 font-bold text-primary">{s.pts}</td>
                     </tr>
                   ))}
+                  {standingsPreview.length === 0 && (
+                    <tr><td colSpan={7} className="text-center py-6 text-muted-foreground">No standings data yet</td></tr>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -144,21 +196,24 @@ const Index = () => {
               <Link to="/matches" className="text-xs text-primary hover:underline font-medium">All Matches →</Link>
             </div>
             <div className="space-y-3">
-              {upcomingMatches.map((match) => (
+              {upcomingMatches?.map((match: any) => (
                 <Link
                   key={match.id}
                   to={`/matches/${match.id}`}
                   className="block bg-gradient-card rounded-lg border border-border p-4 transition-all hover:border-primary/40 hover:shadow-glow-blue"
                 >
-                  <div className="text-xs text-muted-foreground mb-2">{match.date} · {match.time}</div>
+                  <div className="text-xs text-muted-foreground mb-2">{match.match_date} · {match.match_time}</div>
                   <div className="flex items-center justify-between">
-                    <span className="font-semibold text-foreground text-sm">{match.teamA}</span>
+                    <span className="font-semibold text-foreground text-sm">{match.team_a?.name}</span>
                     <span className="text-xs text-muted-foreground px-2">VS</span>
-                    <span className="font-semibold text-foreground text-sm">{match.teamB}</span>
+                    <span className="font-semibold text-foreground text-sm">{match.team_b?.name}</span>
                   </div>
                   <div className="mt-2 text-xs text-primary font-medium uppercase">Scheduled</div>
                 </Link>
               ))}
+              {(!upcomingMatches || upcomingMatches.length === 0) && (
+                <p className="text-sm text-muted-foreground">No upcoming matches</p>
+              )}
             </div>
           </div>
         </div>
@@ -168,7 +223,7 @@ const Index = () => {
       <section className="container mx-auto px-4 pb-16">
         <h2 className="text-2xl font-heading font-bold text-foreground mb-6">Latest News</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {latestNews.map((article) => (
+          {latestNews?.map((article) => (
             <Link
               key={article.id}
               to={`/news/${article.id}`}
@@ -181,9 +236,12 @@ const Index = () => {
                 {article.title}
               </h3>
               <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{article.content}</p>
-              <div className="mt-3 text-xs text-muted-foreground">{article.date} · {article.author}</div>
+              <div className="mt-3 text-xs text-muted-foreground">{new Date(article.published_at).toLocaleDateString()} · {article.author}</div>
             </Link>
           ))}
+          {(!latestNews || latestNews.length === 0) && (
+            <p className="text-sm text-muted-foreground">No news articles yet</p>
+          )}
         </div>
       </section>
     </div>

@@ -187,6 +187,7 @@ export type Database = {
           position: string
           save_pct: number | null
           saves: number | null
+          shots_against: number | null
           shutouts: number | null
           status: string
           team_id: string | null
@@ -206,6 +207,7 @@ export type Database = {
           position?: string
           save_pct?: number | null
           saves?: number | null
+          shots_against?: number | null
           shutouts?: number | null
           status?: string
           team_id?: string | null
@@ -225,6 +227,7 @@ export type Database = {
           position?: string
           save_pct?: number | null
           saves?: number | null
+          shots_against?: number | null
           shutouts?: number | null
           status?: string
           team_id?: string | null
