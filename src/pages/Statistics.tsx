@@ -1,14 +1,24 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { players } from "@/lib/mock-data";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 type Tab = "scorers" | "goals" | "assists" | "goalies" | "penalties";
 
 const Statistics = () => {
   const [tab, setTab] = useState<Tab>("scorers");
 
-  const skaters = players.filter((p) => p.position !== "G");
-  const goalies = players.filter((p) => p.position === "G");
+  const { data: players, isLoading } = useQuery({
+    queryKey: ["statistics-players"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("players").select("*, teams(name)").order("points", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const skaters = (players || []).filter((p: any) => p.position !== "G");
+  const goalies = (players || []).filter((p: any) => p.position === "G");
 
   const tabs: { id: Tab; label: string }[] = [
     { id: "scorers", label: "Top Scorers" },
@@ -20,13 +30,15 @@ const Statistics = () => {
 
   const getRows = () => {
     switch (tab) {
-      case "scorers": return [...skaters].sort((a, b) => b.points - a.points);
-      case "goals": return [...skaters].sort((a, b) => b.goals - a.goals);
-      case "assists": return [...skaters].sort((a, b) => b.assists - a.assists);
-      case "penalties": return [...skaters].sort((a, b) => b.pim - a.pim);
+      case "scorers": return [...skaters].sort((a: any, b: any) => b.points - a.points);
+      case "goals": return [...skaters].sort((a: any, b: any) => b.goals - a.goals);
+      case "assists": return [...skaters].sort((a: any, b: any) => b.assists - a.assists);
+      case "penalties": return [...skaters].sort((a: any, b: any) => b.pim - a.pim);
       default: return [];
     }
   };
+
+  if (isLoading) return <div className="container mx-auto px-4 py-10"><p className="text-muted-foreground">Loading...</p></div>;
 
   return (
     <div className="container mx-auto px-4 py-10">
@@ -63,20 +75,21 @@ const Statistics = () => {
               </tr>
             </thead>
             <tbody>
-              {[...goalies].sort((a, b) => (b.savePct ?? 0) - (a.savePct ?? 0)).map((p, i) => (
+              {[...goalies].sort((a: any, b: any) => (Number(b.save_pct) || 0) - (Number(a.save_pct) || 0)).map((p: any, i) => (
                 <tr key={p.id} className="border-b border-border/50 hover:bg-secondary/50 transition-colors">
                   <td className="px-4 py-3 font-bold text-muted-foreground">{i + 1}</td>
                   <td className="px-4 py-3">
                     <Link to={`/players/${p.id}`} className="font-semibold text-foreground hover:text-primary transition-colors">{p.name}</Link>
                   </td>
-                  <td className="px-4 py-3 text-muted-foreground">{p.teamName}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{p.teams?.name || "Free Agent"}</td>
                   <td className="text-center px-3 py-3">{p.gp}</td>
-                  <td className="text-center px-3 py-3 font-bold text-primary">{((p.savePct ?? 0) * 100).toFixed(1)}%</td>
-                  <td className="text-center px-3 py-3">{p.saves}</td>
-                  <td className="text-center px-3 py-3">{p.gaa?.toFixed(2)}</td>
-                  <td className="text-center px-3 py-3">{p.shutouts}</td>
+                  <td className="text-center px-3 py-3 font-bold text-primary">{p.save_pct != null ? (Number(p.save_pct) * 100).toFixed(1) : "0.0"}%</td>
+                  <td className="text-center px-3 py-3">{p.saves ?? 0}</td>
+                  <td className="text-center px-3 py-3">{p.gaa != null ? Number(p.gaa).toFixed(2) : "—"}</td>
+                  <td className="text-center px-3 py-3">{p.shutouts ?? 0}</td>
                 </tr>
               ))}
+              {goalies.length === 0 && <tr><td colSpan={8} className="text-center py-6 text-muted-foreground">No goalies registered</td></tr>}
             </tbody>
           </table>
         </div>
@@ -96,20 +109,21 @@ const Statistics = () => {
               </tr>
             </thead>
             <tbody>
-              {getRows().map((p, i) => (
+              {getRows().map((p: any, i) => (
                 <tr key={p.id} className="border-b border-border/50 hover:bg-secondary/50 transition-colors">
                   <td className="px-4 py-3 font-bold text-muted-foreground">{i + 1}</td>
                   <td className="px-4 py-3">
                     <Link to={`/players/${p.id}`} className="font-semibold text-foreground hover:text-primary transition-colors">{p.name}</Link>
                   </td>
-                  <td className="px-4 py-3 text-muted-foreground">{p.teamName}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{p.teams?.name || "Free Agent"}</td>
                   <td className="text-center px-3 py-3">{p.gp}</td>
                   <td className="text-center px-3 py-3">{p.goals}</td>
                   <td className="text-center px-3 py-3">{p.assists}</td>
                   <td className="text-center px-3 py-3 font-bold text-primary">{tab === "penalties" ? p.pim : p.points}</td>
-                  <td className="text-center px-3 py-3 text-muted-foreground">{p.plusMinus > 0 ? `+${p.plusMinus}` : p.plusMinus}</td>
+                  <td className="text-center px-3 py-3 text-muted-foreground">{p.plus_minus > 0 ? `+${p.plus_minus}` : p.plus_minus}</td>
                 </tr>
               ))}
+              {getRows().length === 0 && <tr><td colSpan={8} className="text-center py-6 text-muted-foreground">No players registered</td></tr>}
             </tbody>
           </table>
         </div>

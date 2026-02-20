@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./hooks/useAuth";
 import Layout from "./components/Layout";
+import PageTransition from "./components/PageTransition";
 import Index from "./pages/Index";
 import Standings from "./pages/Standings";
 import Teams from "./pages/Teams";
@@ -29,6 +30,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Layout>
+            <PageTransition>
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/standings" element={<Standings />} />
@@ -45,6 +47,7 @@ const App = () => (
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
+            </PageTransition>
           </Layout>
         </BrowserRouter>
       </TooltipProvider>
