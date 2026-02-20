@@ -113,7 +113,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             <div className="flex items-center gap-2">
               <img src={iphfLogo} alt="IPHF" className="h-6 w-6 rounded-full" />
               <span className="font-heading font-bold text-foreground">IPHF</span>
-              <span className="text-xs text-muted-foreground">© 2025 International Puck Hockey Federation</span>
+              <span className="text-xs text-muted-foreground">© 2026 International Puck Hockey Federation</span>
             </div>
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
               <Link to="/standings" className="hover:text-foreground transition-colors">Standings</Link>

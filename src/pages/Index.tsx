@@ -76,7 +76,7 @@ const Index = () => {
             INTERNATIONAL PUCK<br />
             <span className="text-gradient-accent">HOCKEY FEDERATION</span>
           </h1>
-          <p className="text-lg md:text-xl text-muted-foreground mb-2 font-medium">Season 1 — 2025</p>
+          <p className="text-lg md:text-xl text-muted-foreground mb-2 font-medium">Season 1 — 2026</p>
           <p className="text-sm text-muted-foreground mb-8 max-w-xl mx-auto">
             The premier competitive Puck Hockey league. Eight teams. One champion.
           </p>
