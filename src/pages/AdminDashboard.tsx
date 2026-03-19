@@ -137,7 +137,7 @@ const TeamPanel = () => {
       error = insErr;
       if (inserted && logoFile) {
         const logoUrl = await uploadLogo(inserted.id);
-        if (logoUrl) await supabase.from("teams").update({ logo_url: logoUrl }).eq("id", inserted.id);
+        if (logoUrl) await (supabase as any).from("teams").update({ logo_url: logoUrl }).eq("id", inserted.id);
       }
     }
     setUploading(false);
