@@ -1,14 +1,16 @@
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, Shield } from "lucide-react";
 import { useState } from "react";
-import LiveBar from "./LiveBar";
-import { liveMode, matches } from "@/lib/mock-data";
 import { useAuth } from "@/hooks/useAuth";
 import iphfLogo from "@/assets/iphf-logo.png";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import LiveBar from "./LiveBar";
 
 const navItems = [
   { label: "Home", path: "/" },
   { label: "Standings", path: "/standings" },
+  { label: "Playoffs", path: "/playoffs" },
   { label: "Teams", path: "/teams" },
   { label: "Matches", path: "/matches" },
   { label: "Players", path: "/players" },
@@ -21,18 +23,27 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
   const { isAdmin } = useAuth();
 
-  const liveMatch = liveMode.isLive && liveMode.matchId
-    ? matches.find((m) => m.id === liveMode.matchId)
-    : null;
+  const { data: live } = useQuery({
+    queryKey: ["live-bar"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("live_mode")
+        .select("*, matches(*, team_a:teams!team_a_id(name), team_b:teams!team_b_id(name))")
+        .eq("id", 1)
+        .single();
+      return data;
+    },
+    refetchInterval: 15000,
+  });
 
   return (
     <div className="min-h-screen flex flex-col">
       <LiveBar
-        isLive={liveMode.isLive}
-        teamA={liveMatch?.teamA}
-        teamB={liveMatch?.teamB}
-        streamUrl={liveMode.streamUrl}
-        score={liveMode.currentScore}
+        isLive={live?.is_live ?? false}
+        teamA={live?.matches ? (live.matches as any).team_a?.name : undefined}
+        teamB={live?.matches ? (live.matches as any).team_b?.name : undefined}
+        streamUrl={live?.stream_url ?? undefined}
+        score={live?.is_live ? { home: live.team_a_score ?? 0, away: live.team_b_score ?? 0 } : undefined}
       />
 
       {/* Header */}
@@ -99,6 +110,17 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 {item.label}
               </Link>
             ))}
+            <Link
+              to={isAdmin ? "/admin" : "/login"}
+              onClick={() => setMobileOpen(false)}
+              className={`block px-6 py-3 text-sm font-medium border-b border-border transition-colors flex items-center gap-2 ${
+                location.pathname === "/admin" || location.pathname === "/login"
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Shield className="h-3.5 w-3.5" /> Admin
+            </Link>
           </nav>
         )}
       </header>
@@ -117,6 +139,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             </div>
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
               <Link to="/standings" className="hover:text-foreground transition-colors">Standings</Link>
+              <Link to="/playoffs" className="hover:text-foreground transition-colors">Playoffs</Link>
               <Link to="/teams" className="hover:text-foreground transition-colors">Teams</Link>
               <Link to="/matches" className="hover:text-foreground transition-colors">Matches</Link>
               <a href="https://discord.gg/iphf" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">Discord</a>

@@ -16,6 +16,7 @@ import Players from "./pages/Players";
 import PlayerProfile from "./pages/PlayerProfile";
 import Statistics from "./pages/Statistics";
 import { NewsList, NewsDetail } from "./pages/News";
+import Playoffs from "./pages/Playoffs";
 import Login from "./pages/Login";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
@@ -31,22 +32,23 @@ const App = () => (
         <BrowserRouter>
           <Layout>
             <PageTransition>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/standings" element={<Standings />} />
-              <Route path="/teams" element={<Teams />} />
-              <Route path="/teams/:id" element={<TeamProfile />} />
-              <Route path="/matches" element={<Matches />} />
-              <Route path="/matches/:id" element={<MatchDetail />} />
-              <Route path="/players" element={<Players />} />
-              <Route path="/players/:id" element={<PlayerProfile />} />
-              <Route path="/statistics" element={<Statistics />} />
-              <Route path="/news" element={<NewsList />} />
-              <Route path="/news/:id" element={<NewsDetail />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/standings" element={<Standings />} />
+                <Route path="/teams" element={<Teams />} />
+                <Route path="/teams/:id" element={<TeamProfile />} />
+                <Route path="/matches" element={<Matches />} />
+                <Route path="/matches/:id" element={<MatchDetail />} />
+                <Route path="/players" element={<Players />} />
+                <Route path="/players/:id" element={<PlayerProfile />} />
+                <Route path="/statistics" element={<Statistics />} />
+                <Route path="/news" element={<NewsList />} />
+                <Route path="/news/:id" element={<NewsDetail />} />
+                <Route path="/playoffs" element={<Playoffs />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
             </PageTransition>
           </Layout>
         </BrowserRouter>
