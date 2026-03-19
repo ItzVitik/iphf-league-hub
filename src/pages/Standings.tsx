@@ -6,12 +6,12 @@ const Standings = () => {
   const { data: groups, isLoading: groupsLoading } = useQuery({
     queryKey: ["standings-groups"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("groups")
         .select("*, group_teams(team_id, teams(id, name, abbreviation, color, logo_url))")
         .order("name");
       if (error) throw error;
-      return data;
+      return data as any[];
     },
   });
 

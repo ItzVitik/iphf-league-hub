@@ -46,12 +46,12 @@ const Playoffs = () => {
   const { data: playoffData, isLoading } = useQuery({
     queryKey: ["playoffs-page"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("playoffs")
         .select("*, team_a:teams!team_a_id(id, name, color, logo_url), team_b:teams!team_b_id(id, name, color, logo_url), winner:teams!winner_id(id, name)")
         .order("bracket_position");
       if (error) throw error;
-      return data;
+      return data as any[];
     },
   });
 
