@@ -43,7 +43,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         teamA={live?.matches ? (live.matches as any).team_a?.name : undefined}
         teamB={live?.matches ? (live.matches as any).team_b?.name : undefined}
         streamUrl={live?.stream_url ?? undefined}
-        score={live?.is_live ? { home: live.team_a_score ?? 0, away: live.team_b_score ?? 0 } : undefined}
+        score={live?.is_live ? { teamA: live.team_a_score ?? 0, teamB: live.team_b_score ?? 0 } : undefined}
       />
 
       {/* Header */}
