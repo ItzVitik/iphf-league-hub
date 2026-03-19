@@ -5,7 +5,7 @@ import { Trophy } from "lucide-react";
 
 const ROUNDS = ["Quarter-Final", "Semi-Final", "Final"];
 
-const TeamCard = ({ team, winner, isWinner }: { team: any; winner?: any; isWinner?: boolean }) => {
+const TeamCard = ({ team, isWinner }: { team: any; isWinner?: boolean }) => {
   if (!team) return (
     <div className="flex items-center gap-2 px-3 py-2 rounded bg-secondary/30 border border-border/40 text-muted-foreground text-sm">
       <span className="w-5 h-5 rounded bg-border/50" />
