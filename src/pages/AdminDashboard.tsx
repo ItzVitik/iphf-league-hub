@@ -131,7 +131,7 @@ const TeamPanel = () => {
       const logoUrl = await uploadLogo(editId);
       const payload: any = { ...form };
       if (logoUrl) payload.logo_url = logoUrl;
-      ({ error } = await supabase.from("teams").update(payload).eq("id", editId));
+      ({ error } = await (supabase as any).from("teams").update(payload).eq("id", editId));
     } else {
       const { data: inserted, error: insErr } = await supabase.from("teams").insert(form as any).select().single();
       error = insErr;
