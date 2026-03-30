@@ -14,6 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
+      group_teams: {
+        Row: {
+          group_id: string
+          id: string
+          team_id: string
+        }
+        Insert: {
+          group_id: string
+          id?: string
+          team_id: string
+        }
+        Update: {
+          group_id?: string
+          id?: string
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_teams_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_teams_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      groups: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          season: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          season?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          season?: string
+        }
+        Relationships: []
+      }
       live_mode: {
         Row: {
           id: number
@@ -91,6 +145,7 @@ export type Database = {
           match_date: string
           match_time: string
           mvp: string | null
+          result_type: string
           season: string
           status: string
           team_a_id: string | null
@@ -104,6 +159,7 @@ export type Database = {
           match_date: string
           match_time?: string
           mvp?: string | null
+          result_type?: string
           season?: string
           status?: string
           team_a_id?: string | null
@@ -117,6 +173,7 @@ export type Database = {
           match_date?: string
           match_time?: string
           mvp?: string | null
+          result_type?: string
           season?: string
           status?: string
           team_a_id?: string | null
@@ -242,6 +299,71 @@ export type Database = {
           },
         ]
       }
+      playoffs: {
+        Row: {
+          bracket_position: number
+          created_at: string
+          id: string
+          match_id: string | null
+          round: string
+          season: string
+          team_a_id: string | null
+          team_b_id: string | null
+          winner_id: string | null
+        }
+        Insert: {
+          bracket_position?: number
+          created_at?: string
+          id?: string
+          match_id?: string | null
+          round: string
+          season?: string
+          team_a_id?: string | null
+          team_b_id?: string | null
+          winner_id?: string | null
+        }
+        Update: {
+          bracket_position?: number
+          created_at?: string
+          id?: string
+          match_id?: string | null
+          round?: string
+          season?: string
+          team_a_id?: string | null
+          team_b_id?: string | null
+          winner_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "playoffs_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "playoffs_team_a_id_fkey"
+            columns: ["team_a_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "playoffs_team_b_id_fkey"
+            columns: ["team_b_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "playoffs_winner_id_fkey"
+            columns: ["winner_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -268,6 +390,7 @@ export type Database = {
           id: string
           l: number
           ot: number
+          otw: number
           pts: number
           team_id: string
           w: number
@@ -279,6 +402,7 @@ export type Database = {
           id?: string
           l?: number
           ot?: number
+          otw?: number
           pts?: number
           team_id: string
           w?: number
@@ -290,6 +414,7 @@ export type Database = {
           id?: string
           l?: number
           ot?: number
+          otw?: number
           pts?: number
           team_id?: string
           w?: number
@@ -342,6 +467,7 @@ export type Database = {
           discord: string | null
           gm: string | null
           id: string
+          logo_url: string | null
           name: string
         }
         Insert: {
@@ -352,6 +478,7 @@ export type Database = {
           discord?: string | null
           gm?: string | null
           id?: string
+          logo_url?: string | null
           name: string
         }
         Update: {
@@ -362,6 +489,7 @@ export type Database = {
           discord?: string | null
           gm?: string | null
           id?: string
+          logo_url?: string | null
           name?: string
         }
         Relationships: []
